@@ -56,6 +56,9 @@ mkdir -p "$OUTPUT_DIR" || {
     exit 1
 }
 
+# Vollständigen Pfad für Output-Datei erstellen
+OUTPUT_FILE=$(realpath "$OUTPUT_FILE" 2>/dev/null || readlink -f "$OUTPUT_FILE" 2>/dev/null || echo "$(pwd)/$OUTPUT_FILE")
+
 # QCAD prüfen
 if ! command -v qcad >/dev/null 2>&1; then
     log_error "QCAD ist nicht installiert oder nicht im PATH"
@@ -96,26 +99,19 @@ if ! command -v xvfb-run >/dev/null 2>&1; then
     unset STRATEGIES[0]  # Entferne Xvfb-Strategie
 fi
 
-# QCAD mit optimierten Strategien versuchen
-SUCCESS=false
-STRATEGY_NUM=0
-
-for strategy in "${STRATEGIES[@]}"; do
-    if [ -z "$strategy" ]; then
-        continue
-    fi
-    
-    STRATEGY_NUM=$((STRATEGY_NUM + 1))
-    log_info "=== Strategie $STRATEGY_NUM ==="
+# Funktion für sicheren QCAD-Start
+run_qcad_strategy() {
+    local strategy="$1"
+    local strategy_num="$2"
     
     # Command zusammenbauen
-    FULL_COMMAND="$strategy '$SCRIPT_PATH' --config='$CONFIG_FILE' --output='$OUTPUT_FILE'"
+    local FULL_COMMAND="$strategy '$SCRIPT_PATH' --config='$CONFIG_FILE' --output='$OUTPUT_FILE'"
     
     log_info "Befehl: $FULL_COMMAND"
     
     # Erweiterte Timeout-Behandlung (30 Sekunden)
     timeout 30s bash -c "$FULL_COMMAND" 2>&1 &
-    QCAD_PID=$!
+    local QCAD_PID=$!
     
     # Warte auf Prozess mit Live-Monitoring
     local count=0
@@ -129,7 +125,7 @@ for strategy in "${STRATEGIES[@]}"; do
             
             # Frühe Erfolgserkennung
             if [ -f "$OUTPUT_FILE" ]; then
-                FILE_SIZE=$(stat -c%s "$OUTPUT_FILE" 2>/dev/null || echo "0")
+                local FILE_SIZE=$(stat -c%s "$OUTPUT_FILE" 2>/dev/null || echo "0")
                 if [ "$FILE_SIZE" -gt 100 ]; then
                     log_success "Datei während Ausführung erstellt!"
                     break
@@ -149,9 +145,27 @@ for strategy in "${STRATEGIES[@]}"; do
     
     # Warte auf Prozess-Ende
     wait $QCAD_PID 2>/dev/null
-    EXIT_CODE=$?
+    local EXIT_CODE=$?
     
     log_info "Exit-Code: $EXIT_CODE"
+    return $EXIT_CODE
+}
+
+# QCAD mit optimierten Strategien versuchen
+SUCCESS=false
+STRATEGY_NUM=0
+
+for strategy in "${STRATEGIES[@]}"; do
+    if [ -z "$strategy" ]; then
+        continue
+    fi
+    
+    STRATEGY_NUM=$((STRATEGY_NUM + 1))
+    log_info "=== Strategie $STRATEGY_NUM ==="
+    
+    # Strategy ausführen
+    run_qcad_strategy "$strategy" "$STRATEGY_NUM"
+    EXIT_CODE=$?
     
     # Erfolgs-Prüfung
     if [ -f "$OUTPUT_FILE" ]; then
@@ -222,6 +236,7 @@ else
     echo "  3. Teste manuell: qcad -platform offscreen"
     echo "  4. Prüfe Logs in /tmp für weitere Hinweise"
     echo "  5. System-RAM prüfen: free -h"
+    echo "  6. Schreibrechte prüfen: ls -la $(dirname \"$OUTPUT_FILE\")"
     
     exit 1
 fi
