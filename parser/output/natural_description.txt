@@ -3,6 +3,10 @@ DXF-Version: AC1015
 Anzahl Layers: 2
 Anzahl geometrische Elemente: 16
 
+## Layer-Struktur:
+- Layer '0': Farbe 7, Linientyp Continuous
+- Layer 'Defpoints': Farbe 7, Linientyp Continuous
+
 ## Geometrische Elemente:
 ### Linien (16 Stück):
 - Linie 1: Von Punkt (0.0, 0.0) zu Punkt (160.0, 0.0), Länge: 160.0 Einheiten
@@ -16,3 +20,8 @@ Anzahl geometrische Elemente: 16
 - Linie 9: Von Punkt (0.0, 180.0) zu Punkt (0.0, 130.0), Länge: 50.0 Einheiten
 - Linie 10: Von Punkt (70.0, 145.0) zu Punkt (90.0, 145.0), Länge: 20.0 Einheiten
   ... und 6 weitere Linien
+
+## Räumliche Ausdehnung:
+- X-Bereich: 0.0 bis 160.0 (Breite: 160.0)
+- Y-Bereich: 0.0 bis 233.0 (Höhe: 233.0)
+- Gesamtfläche des Bounding-Rechtecks: 37280.0 Quadrateinheiten

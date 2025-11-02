@@ -2,18 +2,18 @@
   "metadata": {
     "dxf_version": "AC1015",
     "filename": "alpine_sennhuette.dxf",
-    "units": "unknown"
+    "units": 6
   },
   "layers": {
     "0": {
       "color": 7,
       "linetype": "Continuous",
-      "lineweight": "default"
+      "lineweight": 25
     },
     "Defpoints": {
       "color": 7,
       "linetype": "Continuous",
-      "lineweight": "default"
+      "lineweight": -3
     }
   },
   "entities": [
@@ -290,5 +290,5 @@
       "length": 160.0
     }
   ],
-  "natural_description": "# Beschreibung der DXF-Datei: alpine_sennhuette.dxf\nDXF-Version: AC1015\nAnzahl Layers: 2\nAnzahl geometrische Elemente: 16\n\n## Geometrische Elemente:\n### Linien (16 Stück):\n- Linie 1: Von Punkt (0.0, 0.0) zu Punkt (160.0, 0.0), Länge: 160.0 Einheiten\n- Linie 2: Von Punkt (160.0, 0.0) zu Punkt (160.0, 120.0), Länge: 120.0 Einheiten\n- Linie 3: Von Punkt (160.0, 120.0) zu Punkt (0.0, 120.0), Länge: 160.0 Einheiten\n- Linie 4: Von Punkt (0.0, 120.0) zu Punkt (0.0, 0.0), Länge: 120.0 Einheiten\n- Linie 5: Von Punkt (20.0, 0.0) zu Punkt (50.0, 0.0), Länge: 30.0 Einheiten\n- Linie 6: Von Punkt (0.0, 130.0) zu Punkt (160.0, 130.0), Länge: 160.0 Einheiten\n- Linie 7: Von Punkt (160.0, 130.0) zu Punkt (160.0, 180.0), Länge: 50.0 Einheiten\n- Linie 8: Von Punkt (160.0, 180.0) zu Punkt (0.0, 180.0), Länge: 160.0 Einheiten\n- Linie 9: Von Punkt (0.0, 180.0) zu Punkt (0.0, 130.0), Länge: 50.0 Einheiten\n- Linie 10: Von Punkt (70.0, 145.0) zu Punkt (90.0, 145.0), Länge: 20.0 Einheiten\n  ... und 6 weitere Linien\n"
+  "natural_description": "# Beschreibung der DXF-Datei: alpine_sennhuette.dxf\nDXF-Version: AC1015\nAnzahl Layers: 2\nAnzahl geometrische Elemente: 16\n\n## Layer-Struktur:\n- Layer '0': Farbe 7, Linientyp Continuous\n- Layer 'Defpoints': Farbe 7, Linientyp Continuous\n\n## Geometrische Elemente:\n### Linien (16 Stück):\n- Linie 1: Von Punkt (0.0, 0.0) zu Punkt (160.0, 0.0), Länge: 160.0 Einheiten\n- Linie 2: Von Punkt (160.0, 0.0) zu Punkt (160.0, 120.0), Länge: 120.0 Einheiten\n- Linie 3: Von Punkt (160.0, 120.0) zu Punkt (0.0, 120.0), Länge: 160.0 Einheiten\n- Linie 4: Von Punkt (0.0, 120.0) zu Punkt (0.0, 0.0), Länge: 120.0 Einheiten\n- Linie 5: Von Punkt (20.0, 0.0) zu Punkt (50.0, 0.0), Länge: 30.0 Einheiten\n- Linie 6: Von Punkt (0.0, 130.0) zu Punkt (160.0, 130.0), Länge: 160.0 Einheiten\n- Linie 7: Von Punkt (160.0, 130.0) zu Punkt (160.0, 180.0), Länge: 50.0 Einheiten\n- Linie 8: Von Punkt (160.0, 180.0) zu Punkt (0.0, 180.0), Länge: 160.0 Einheiten\n- Linie 9: Von Punkt (0.0, 180.0) zu Punkt (0.0, 130.0), Länge: 50.0 Einheiten\n- Linie 10: Von Punkt (70.0, 145.0) zu Punkt (90.0, 145.0), Länge: 20.0 Einheiten\n  ... und 6 weitere Linien\n\n## Räumliche Ausdehnung:\n- X-Bereich: 0.0 bis 160.0 (Breite: 160.0)\n- Y-Bereich: 0.0 bis 233.0 (Höhe: 233.0)\n- Gesamtfläche des Bounding-Rechtecks: 37280.0 Quadrateinheiten"
 }
