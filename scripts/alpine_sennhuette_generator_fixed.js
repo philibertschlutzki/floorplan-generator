@@ -80,10 +80,25 @@ function loadJsonConfig(configPath) {
         
         print("✓ Datei existiert: " + configPath + " (Größe: " + fi.size() + " Bytes)");
         
-        // FIX: Korrekte QFile.open() Syntax ohne undefined 'file' Variable
-        if (!f.open(QIODevice.ReadOnly | QIODevice.Text)) {
-            print("❌ Kann Konfigurationsdatei nicht öffnen (ReadOnly|Text): " + configPath);
-            print("Fehler: " + f.errorString());
+        // FIX: Vereinfachte QFile.open() ohne QIODevice-Konstanten (ReadOnly-Standard)
+        var opened = false;
+        try {
+            opened = f.open(); // Standard: ReadOnly
+        } catch (e1) {
+            // Fallback: numerischer Modus (1 = ReadOnly)
+            try {
+                opened = f.open(1);
+            } catch (e2) {
+                print("❌ QFile.open() Exception: " + e2);
+                opened = false;
+            }
+        }
+
+        if (!opened) {
+            print("❌ Kann Konfigurationsdatei nicht öffnen: " + configPath);
+            if (typeof f.errorString === "function") {
+                print("Fehler: " + f.errorString());
+            }
             return null;
         }
 
