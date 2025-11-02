@@ -5449,21 +5449,25 @@ PageTagSettings/TagPosition
 350
 E2
   3
-UnitSettings/PaperUnit
+QCADVersion
 350
 E3
   3
-ViewportCenter
+UnitSettings/PaperUnit
 350
 E4
   3
-ViewportHeight
+ViewportCenter
 350
 E5
   3
-ViewportWidth
+ViewportHeight
 350
 E6
+  3
+ViewportWidth
+350
+E7
   0
 XRECORD
   5
@@ -6050,12 +6054,24 @@ B0
 AcDbXrecord
 280
 1
+1000
+3.32.4
+  0
+XRECORD
+  5
+E4
+330
+B0
+100
+AcDbXrecord
+280
+1
  90
 4
   0
 XRECORD
   5
-E5
+E6
 330
 B0
 100
@@ -6067,7 +6083,7 @@ AcDbXrecord
   0
 XRECORD
   5
-E6
+E7
 330
 B0
 100
