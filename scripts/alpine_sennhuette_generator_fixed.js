@@ -6,8 +6,8 @@
 // - Korrekte Verwendung von scale (Root-Level) statt dimensions.scale
 // - Defensive Validierungen und Export-Checks
 
-include("scripts/simple.js");
-include("scripts/Tools/arguments.js");
+//include("scripts/simple.js");
+//include("scripts/Tools/arguments.js");
 
 // Globale Variablen
 var configFile = "";
@@ -64,7 +64,7 @@ function loadJsonConfig(configPath) {
             print("❌ Konfigurationsdatei existiert nicht: " + configPath);
             return null;
         }
-        if (!f.open(QIODevice.ReadOnly | QIODevice.Text)) {
+        if (!f.open(file.open(QIODevice.OpenMode(QIODevice.ReadOnly | QIODevice.Text)))) {
             print("❌ Kann Konfigurationsdatei nicht öffnen (ReadOnly|Text): " + configPath);
             return null;
         }
