@@ -1,5 +1,5 @@
 # DXF Workflow Report
-Generiert am: 2025-11-02 21:30:24
+Generiert am: 2025-11-02 21:31:40
 
 **Status:** ❌ Mit Fehlern
 **Input URL:** https://raw.githubusercontent.com/philibertschlutzki/floorplan-generator/main/output/alpine_sennhuette.dxf
@@ -19,17 +19,17 @@ Generiert am: 2025-11-02 21:30:24
 
 ## Workflow-Log
 ```
-[2025-11-02 21:30:22] INFO: === STARTE DXF WORKFLOW ===
-[2025-11-02 21:30:22] INFO: Starte Download von: https://github.com/philibertschlutzki/floorplan-generator/blob/main/output/alpine_sennhuette.dxf
-[2025-11-02 21:30:22] INFO: Konvertierte GitHub URL: https://raw.githubusercontent.com/philibertschlutzki/floorplan-generator/main/output/alpine_sennhuette.dxf
-[2025-11-02 21:30:23] INFO: Download erfolgreich: /tmp/dxf_workflow_me0plg54/alpine_sennhuette.dxf (23510 bytes)
-[2025-11-02 21:30:23] INFO: Starte DXF zu Natürlichsprache Konvertierung...
-[2025-11-02 21:30:23] INFO: Beschreibung erstellt: output/natural_description.txt
-[2025-11-02 21:30:23] INFO: Strukturierte Daten erstellt: output/structured_data.json
-[2025-11-02 21:30:23] INFO: DXF zu Text Konvertierung erfolgreich
-[2025-11-02 21:30:23] INFO: Starte Natürlichsprache zu DXF Konvertierung...
-[2025-11-02 21:30:24] DEBUG: Text zu DXF Konvertierung - Return Code: 0
-[2025-11-02 21:30:24] DEBUG: Stdout: Starte Konvertierung: output/structured_data.json -> output/reconstructed.dxf
+[2025-11-02 21:31:38] INFO: === STARTE DXF WORKFLOW ===
+[2025-11-02 21:31:38] INFO: Starte Download von: https://github.com/philibertschlutzki/floorplan-generator/blob/main/output/alpine_sennhuette.dxf
+[2025-11-02 21:31:38] INFO: Konvertierte GitHub URL: https://raw.githubusercontent.com/philibertschlutzki/floorplan-generator/main/output/alpine_sennhuette.dxf
+[2025-11-02 21:31:39] INFO: Download erfolgreich: /tmp/dxf_workflow_wwwoquvq/alpine_sennhuette.dxf (23510 bytes)
+[2025-11-02 21:31:39] INFO: Starte DXF zu Natürlichsprache Konvertierung...
+[2025-11-02 21:31:40] INFO: Beschreibung erstellt: output/natural_description.txt
+[2025-11-02 21:31:40] INFO: Strukturierte Daten erstellt: output/structured_data.json
+[2025-11-02 21:31:40] INFO: DXF zu Text Konvertierung erfolgreich
+[2025-11-02 21:31:40] INFO: Starte Natürlichsprache zu DXF Konvertierung...
+[2025-11-02 21:31:40] DEBUG: Text zu DXF Konvertierung - Return Code: 0
+[2025-11-02 21:31:40] DEBUG: Stdout: Starte Konvertierung: output/structured_data.json -> output/reconstructed.dxf
 Lade strukturierte JSON-Daten...
 JSON-Daten geladen: 16 Entities
 Neues DXF-Dokument erstellt (Version: AC1015)
@@ -41,7 +41,7 @@ DXF-Datei erfolgreich gespeichert: output/reconstructed.dxf
 
 ✅ DXF-Datei erfolgreich rekonstruiert: output/reconstructed.dxf
 
-[2025-11-02 21:30:24] INFO: Rekonstruierte DXF erstellt: output/reconstructed.dxf
-[2025-11-02 21:30:24] INFO: Starte Differenz-Analyse...
-[2025-11-02 21:30:24] INFO: Differenz-Analyse erfolgreich
+[2025-11-02 21:31:40] INFO: Rekonstruierte DXF erstellt: output/reconstructed.dxf
+[2025-11-02 21:31:40] INFO: Starte Differenz-Analyse...
+[2025-11-02 21:31:40] INFO: Differenz-Analyse erfolgreich
 ```
