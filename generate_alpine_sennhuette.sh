@@ -1,8 +1,7 @@
 #!/bin/bash
 
-# Alpine Sennhütte Generator - Shell Script
-# Headless-optimierte Version mit robuster Fehlerbehandlung
-# Behebt Speicherzugriffsfehler durch korrekte QCAD-Parameter
+# Alpine Sennhütte Generator - Optimiertes Shell Script
+# Fokus auf die funktionierenden Strategien mit besserem Timeout
 
 CONFIG_FILE="$1"
 OUTPUT_FILE="${2:-output/alpine_sennhuette.dxf}"
@@ -15,21 +14,19 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Logging-Funktionen
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
+log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+log_success() { echo -e "${GREEN}[✓]${NC} $1"; }
+log_warning() { echo -e "${YELLOW}[WARNUNG]${NC} $1"; }
+log_error() { echo -e "${RED}[❌]${NC} $1"; }
 
-log_success() {
-    echo -e "${GREEN}[✓]${NC} $1"
+# Signal-Handler für sauberes Beenden
+cleanup() {
+    log_warning "Script unterbrochen - räume auf..."
+    # Verwaiste QCAD-Prozesse beenden
+    pkill -f "qcad.*alpine_sennhutte_generator_fixed.js" 2>/dev/null
+    exit 130
 }
-
-log_warning() {
-    echo -e "${YELLOW}[WARNUNG]${NC} $1"
-}
-
-log_error() {
-    echo -e "${RED}[❌]${NC} $1"
-}
+trap cleanup INT TERM
 
 # Eingabe-Validierung
 if [ -z "$CONFIG_FILE" ]; then
@@ -43,10 +40,8 @@ if [ ! -f "$CONFIG_FILE" ]; then
     exit 1
 fi
 
-# Konfigurationsdatei validieren
-if ! command -v jq >/dev/null 2>&1; then
-    log_warning "jq nicht installiert - JSON-Validierung übersprungen"
-else
+# JSON-Validierung
+if command -v jq >/dev/null 2>&1; then
     if ! jq empty "$CONFIG_FILE" >/dev/null 2>&1; then
         log_error "Ungültige JSON-Datei: $CONFIG_FILE"
         exit 1
@@ -54,163 +49,179 @@ else
     log_success "JSON-Konfiguration validiert"
 fi
 
-# Output-Verzeichnis erstellen falls nötig
+# Output-Verzeichnis
 OUTPUT_DIR=$(dirname "$OUTPUT_FILE")
-if [ ! -d "$OUTPUT_DIR" ]; then
-    log_info "Erstelle Output-Verzeichnis: $OUTPUT_DIR"
-    mkdir -p "$OUTPUT_DIR" || {
-        log_error "Konnte Output-Verzeichnis nicht erstellen: $OUTPUT_DIR"
-        exit 1
-    }
-fi
+mkdir -p "$OUTPUT_DIR" || {
+    log_error "Konnte Output-Verzeichnis nicht erstellen: $OUTPUT_DIR"
+    exit 1
+}
 
-# QCAD-Installation prüfen
+# QCAD prüfen
 if ! command -v qcad >/dev/null 2>&1; then
     log_error "QCAD ist nicht installiert oder nicht im PATH"
-    log_info "Installation mit: sudo apt install qcad"
     exit 1
 fi
 
-# QCAD-Version ermitteln
-QCAD_VERSION=$(qcad --version 2>/dev/null | head -n1 || echo "unbekannt")
-log_info "QCAD Version: $QCAD_VERSION"
-
-# Script-Datei prüfen
-SCRIPT_PATH="scripts/alpine_sennhuette_generator_fixed.js"
+# Script prüfen
+SCRIPT_PATH="scripts/alpine_sennhutte_generator_fixed.js"
 if [ ! -f "$SCRIPT_PATH" ]; then
     log_error "JavaScript-Generator nicht gefunden: $SCRIPT_PATH"
     exit 1
 fi
 
-# Debug-Informationen
-echo ""
-log_info "=== Alpine Sennhütte Generator (Headless) ==="
+# Info
+log_info "=== Alpine Sennhütte Generator (Optimiert) ==="
 log_info "Konfiguration: $CONFIG_FILE"
 log_info "Ausgabe: $OUTPUT_FILE"
-log_info "QCAD Script: $SCRIPT_PATH"
-log_info "Arbeitsverzeichnis: $(pwd)"
-echo ""
+log_info "Script: $SCRIPT_PATH"
 
-# System-Umgebung prüfen
-if [ -n "$DISPLAY" ]; then
-    log_warning "X11 Display erkannt: $DISPLAY"
-    log_info "Versuche dennoch Headless-Modus..."
-else
-    log_info "Headless-Umgebung erkannt (kein DISPLAY)"
-fi
+# Alte Ausgabedatei löschen
+[ -f "$OUTPUT_FILE" ] && rm "$OUTPUT_FILE"
 
-# Alte Ausgabedatei löschen falls vorhanden
-if [ -f "$OUTPUT_FILE" ]; then
-    log_info "Lösche vorherige Ausgabedatei: $OUTPUT_FILE"
-    rm "$OUTPUT_FILE"
-fi
-
-# QCAD Headless-Strategien definieren
-declare -a QCAD_STRATEGIES=(
-    # Strategie 1: Vollständig headless mit offscreen platform
-    "qcad -platform offscreen -style plastique -autostart"
-    # Strategie 2: Minimal headless ohne style
-    "qcad -platform offscreen -autostart"
-    # Strategie 3: Mit explizitem minimal platform
-    "qcad -platform minimal -autostart"
-    # Strategie 4: Xvfb virtueller X-Server (falls installiert)
-    "xvfb-run -a qcad -autostart"
-    # Strategie 5: Standard mit QT-Optimierungen
-    "QT_QPA_PLATFORM=offscreen QT_AUTO_SCREEN_SCALE_FACTOR=0 qcad -autostart"
+# OPTIMIERTE QCAD-STRATEGIEN (nur die vielversprechendsten)
+declare -a STRATEGIES=(
+    # Strategie 1: Xvfb (meist am stabilsten)
+    "xvfb-run -a -s '-screen 0 1024x768x24' qcad -autostart"
+    # Strategie 2: Qt Offscreen mit Umgebungsvariablen  
+    "QT_QPA_PLATFORM=offscreen QT_LOGGING_RULES='*.debug=false' qcad -autostart"
+    # Strategie 3: QCAD minimal
+    "qcad -platform minimal -style fusion -autostart"
+    # Strategie 4: Vollständig headless
+    "QT_QPA_PLATFORM=offscreen QT_AUTO_SCREEN_SCALE_FACTOR=0 QT_FONT_DPI=96 qcad -platform offscreen -autostart"
 )
 
 # Xvfb-Verfügbarkeit prüfen
 if ! command -v xvfb-run >/dev/null 2>&1; then
-    log_warning "xvfb-run nicht verfügbar - einige Strategien werden übersprungen"
-    # Entferne Xvfb-Strategie aus Array
-    unset QCAD_STRATEGIES[3]
+    log_warning "xvfb-run nicht verfügbar - installiere mit: sudo apt install xvfb"
+    unset STRATEGIES[0]  # Entferne Xvfb-Strategie
 fi
 
-# QCAD mit verschiedenen Strategien versuchen
+# QCAD mit optimierten Strategien versuchen
 SUCCESS=false
 STRATEGY_NUM=0
 
-for strategy in "${QCAD_STRATEGIES[@]}"; do
+for strategy in "${STRATEGIES[@]}"; do
     if [ -z "$strategy" ]; then
         continue
     fi
     
     STRATEGY_NUM=$((STRATEGY_NUM + 1))
-    log_info "=== Strategie $STRATEGY_NUM: $strategy ==="
+    log_info "=== Strategie $STRATEGY_NUM ==="
     
-    # Command mit Argumenten zusammenbauen
-    FULL_COMMAND="$strategy $SCRIPT_PATH --config='$CONFIG_FILE' --output='$OUTPUT_FILE'"
+    # Command zusammenbauen
+    FULL_COMMAND="$strategy '$SCRIPT_PATH' --config='$CONFIG_FILE' --output='$OUTPUT_FILE'"
     
-    log_info "Führe aus: $FULL_COMMAND"
+    log_info "Befehl: $FULL_COMMAND"
     
-    # Timeout für QCAD-Ausführung (60 Sekunden)
-    timeout 60s bash -c "$FULL_COMMAND" 2>&1
+    # Erweiterte Timeout-Behandlung (30 Sekunden)
+    timeout 30s bash -c "$FULL_COMMAND" 2>&1 &
+    QCAD_PID=$!
+    
+    # Warte auf Prozess mit Live-Monitoring
+    local count=0
+    while kill -0 $QCAD_PID 2>/dev/null; do
+        sleep 1
+        count=$((count + 1))
+        
+        # Alle 5 Sekunden Status prüfen
+        if [ $((count % 5)) -eq 0 ]; then
+            log_info "Läuft... (${count}s)"
+            
+            # Frühe Erfolgserkennung
+            if [ -f "$OUTPUT_FILE" ]; then
+                FILE_SIZE=$(stat -c%s "$OUTPUT_FILE" 2>/dev/null || echo "0")
+                if [ "$FILE_SIZE" -gt 100 ]; then
+                    log_success "Datei während Ausführung erstellt!"
+                    break
+                fi
+            fi
+        fi
+        
+        # Timeout prüfen (30s)
+        if [ $count -ge 30 ]; then
+            log_warning "Timeout erreicht - beende Prozess"
+            kill -TERM $QCAD_PID 2>/dev/null
+            sleep 2
+            kill -KILL $QCAD_PID 2>/dev/null
+            break
+        fi
+    done
+    
+    # Warte auf Prozess-Ende
+    wait $QCAD_PID 2>/dev/null
     EXIT_CODE=$?
     
     log_info "Exit-Code: $EXIT_CODE"
     
-    # Erfolg prüfen
-    if [ $EXIT_CODE -eq 0 ] && [ -f "$OUTPUT_FILE" ]; then
-        FILE_SIZE=$(stat -f%z "$OUTPUT_FILE" 2>/dev/null || stat -c%s "$OUTPUT_FILE" 2>/dev/null || echo "0")
+    # Erfolgs-Prüfung
+    if [ -f "$OUTPUT_FILE" ]; then
+        FILE_SIZE=$(stat -c%s "$OUTPUT_FILE" 2>/dev/null || echo "0")
         
-        if [ "$FILE_SIZE" -gt 100 ]; then  # Mindestens 100 Bytes für gültige DXF
-            log_success "Strategie $STRATEGY_NUM erfolgreich! Datei: $OUTPUT_FILE ($FILE_SIZE Bytes)"
+        if [ "$FILE_SIZE" -gt 100 ]; then
+            log_success "Strategie $STRATEGY_NUM erfolgreich!"
+            log_success "Datei: $OUTPUT_FILE ($FILE_SIZE Bytes)"
             SUCCESS=true
             break
         else
-            log_warning "Strategie $STRATEGY_NUM: Ausgabedatei zu klein ($FILE_SIZE Bytes)"
-            rm -f "$OUTPUT_FILE"  # Leere Datei löschen
+            log_warning "Datei zu klein: $FILE_SIZE Bytes"
+            rm -f "$OUTPUT_FILE"
         fi
-    elif [ $EXIT_CODE -eq 124 ]; then
-        log_warning "Strategie $STRATEGY_NUM: Timeout nach 60 Sekunden erreicht"
-    elif [ $EXIT_CODE -eq 139 ]; then
-        log_warning "Strategie $STRATEGY_NUM: Speicherzugriffsfehler (Segmentation Fault)"
-    else
-        log_warning "Strategie $STRATEGY_NUM fehlgeschlagen (Exit-Code: $EXIT_CODE)"
     fi
+    
+    # Fehler-Analyse
+    case $EXIT_CODE in
+        0)
+            log_warning "Strategie $STRATEGY_NUM: Erfolgreich beendet, aber keine gültige Ausgabedatei"
+            ;;
+        124)
+            log_warning "Strategie $STRATEGY_NUM: Timeout (30s)"
+            ;;
+        139)
+            log_warning "Strategie $STRATEGY_NUM: Speicherzugriffsfehler"
+            ;;
+        143)
+            log_warning "Strategie $STRATEGY_NUM: SIGTERM (unterbrochen)"
+            ;;
+        *)
+            log_warning "Strategie $STRATEGY_NUM: Unbekannter Fehler (Exit: $EXIT_CODE)"
+            ;;
+    esac
     
     echo ""
 done
 
-# Endgültiges Ergebnis
+# Endergebnis
 echo ""
 log_info "=== ENDERGEBNIS ==="
 
 if [ "$SUCCESS" = true ]; then
-    FILE_SIZE=$(stat -f%z "$OUTPUT_FILE" 2>/dev/null || stat -c%s "$OUTPUT_FILE" 2>/dev/null || echo "0")
+    FILE_SIZE=$(stat -c%s "$OUTPUT_FILE" 2>/dev/null)
     log_success "✅ Alpine Sennhütte erfolgreich generiert!"
-    log_success "📁 Ausgabedatei: $OUTPUT_FILE ($FILE_SIZE Bytes)"
+    log_success "📁 Datei: $OUTPUT_FILE ($FILE_SIZE Bytes)"
     
-    # Zusätzliche Datei-Informationen
+    # Datei-Info
     if command -v file >/dev/null 2>&1; then
-        FILE_TYPE=$(file "$OUTPUT_FILE" 2>/dev/null || echo "unbekannt")
-        log_info "🔍 Dateityp: $FILE_TYPE"
+        FILE_TYPE=$(file "$OUTPUT_FILE" 2>/dev/null | cut -d: -f2)
+        log_info "🔍 Typ:$FILE_TYPE"
     fi
     
-    # Kurze Vorschau der DXF (erste paar Zeilen)
-    if [ -r "$OUTPUT_FILE" ]; then
-        log_info "🔍 DXF-Vorschau (erste 3 Zeilen):"
-        head -n 3 "$OUTPUT_FILE" 2>/dev/null | sed 's/^/    /'
+    # DXF-Header prüfen
+    if head -n 5 "$OUTPUT_FILE" 2>/dev/null | grep -q "DXF\|SECTION"; then
+        log_success "🔍 Gültiger DXF-Header erkannt"
+    else
+        log_warning "🔍 DXF-Header nicht erkannt - Datei öffnen prüfen"
     fi
     
     exit 0
 else
-    log_error "❌ Alle QCAD-Strategien fehlgeschlagen!"
+    log_error "❌ Alle Strategien fehlgeschlagen!"
     echo ""
-    log_error "Mögliche Lösungsansätze:"
-    echo "  1. QCAD-Installation prüfen: sudo apt install qcad"
-    echo "  2. Xvfb installieren: sudo apt install xvfb"
-    echo "  3. Schreibberechtigung prüfen für: $OUTPUT_DIR"
-    echo "  4. QCAD manuell testen: qcad --version"
-    echo "  5. Script-Pfad prüfen: $SCRIPT_PATH"
-    echo ""
-    log_error "Debug-Informationen:"
-    echo "  - Arbeitsverzeichnis: $(pwd)"
-    echo "  - Konfigurationsdatei: $CONFIG_FILE ($(stat -f%z "$CONFIG_FILE" 2>/dev/null || stat -c%s "$CONFIG_FILE" 2>/dev/null || echo "0") Bytes)"
-    echo "  - Output-Verzeichnis: $OUTPUT_DIR ($(ls -ld "$OUTPUT_DIR" 2>/dev/null || echo "nicht verfügbar"))"
-    echo "  - DISPLAY: ${DISPLAY:-"(nicht gesetzt)"}"
-    echo "  - USER: ${USER:-"unbekannt"}"
-    echo "  - PATH: $PATH"
+    log_error "Empfohlene Maßnahmen:"
+    echo "  1. Installiere Xvfb: sudo apt install xvfb"
+    echo "  2. Prüfe QCAD: qcad --version"
+    echo "  3. Teste manuell: qcad -platform offscreen"
+    echo "  4. Prüfe Logs in /tmp für weitere Hinweise"
+    echo "  5. System-RAM prüfen: free -h"
     
     exit 1
 fi
