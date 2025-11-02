@@ -1,0 +1,294 @@
+{
+  "metadata": {
+    "dxf_version": "AC1015",
+    "filename": "alpine_sennhuette.dxf",
+    "units": "unknown"
+  },
+  "layers": {
+    "0": {
+      "color": 7,
+      "linetype": "Continuous",
+      "lineweight": "default"
+    },
+    "Defpoints": {
+      "color": 7,
+      "linetype": "Continuous",
+      "lineweight": "default"
+    }
+  },
+  "entities": [
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "59",
+      "start_point": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "end_point": [
+        160.0,
+        0.0,
+        0.0
+      ],
+      "length": 160.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "5A",
+      "start_point": [
+        160.0,
+        0.0,
+        0.0
+      ],
+      "end_point": [
+        160.0,
+        120.0,
+        0.0
+      ],
+      "length": 120.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "5B",
+      "start_point": [
+        160.0,
+        120.0,
+        0.0
+      ],
+      "end_point": [
+        0.0,
+        120.0,
+        0.0
+      ],
+      "length": 160.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "5C",
+      "start_point": [
+        0.0,
+        120.0,
+        0.0
+      ],
+      "end_point": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "length": 120.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "5D",
+      "start_point": [
+        20.0,
+        0.0,
+        0.0
+      ],
+      "end_point": [
+        50.0,
+        0.0,
+        0.0
+      ],
+      "length": 30.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "5E",
+      "start_point": [
+        0.0,
+        130.0,
+        0.0
+      ],
+      "end_point": [
+        160.0,
+        130.0,
+        0.0
+      ],
+      "length": 160.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "5F",
+      "start_point": [
+        160.0,
+        130.0,
+        0.0
+      ],
+      "end_point": [
+        160.0,
+        180.0,
+        0.0
+      ],
+      "length": 50.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "60",
+      "start_point": [
+        160.0,
+        180.0,
+        0.0
+      ],
+      "end_point": [
+        0.0,
+        180.0,
+        0.0
+      ],
+      "length": 160.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "61",
+      "start_point": [
+        0.0,
+        180.0,
+        0.0
+      ],
+      "end_point": [
+        0.0,
+        130.0,
+        0.0
+      ],
+      "length": 50.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "62",
+      "start_point": [
+        70.0,
+        145.0,
+        0.0
+      ],
+      "end_point": [
+        90.0,
+        145.0,
+        0.0
+      ],
+      "length": 20.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "63",
+      "start_point": [
+        90.0,
+        145.0,
+        0.0
+      ],
+      "end_point": [
+        90.0,
+        147.0,
+        0.0
+      ],
+      "length": 2.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "64",
+      "start_point": [
+        90.0,
+        147.0,
+        0.0
+      ],
+      "end_point": [
+        70.0,
+        147.0,
+        0.0
+      ],
+      "length": 20.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "65",
+      "start_point": [
+        70.0,
+        147.0,
+        0.0
+      ],
+      "end_point": [
+        70.0,
+        145.0,
+        0.0
+      ],
+      "length": 2.0
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "66",
+      "start_point": [
+        0.0,
+        185.0,
+        0.0
+      ],
+      "end_point": [
+        80.0,
+        233.0,
+        0.0
+      ],
+      "length": 93.295
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "67",
+      "start_point": [
+        80.0,
+        233.0,
+        0.0
+      ],
+      "end_point": [
+        160.0,
+        185.0,
+        0.0
+      ],
+      "length": 93.295
+    },
+    {
+      "type": "LINE",
+      "layer": "0",
+      "color": 256,
+      "handle": "68",
+      "start_point": [
+        160.0,
+        185.0,
+        0.0
+      ],
+      "end_point": [
+        0.0,
+        185.0,
+        0.0
+      ],
+      "length": 160.0
+    }
+  ],
+  "natural_description": "# Beschreibung der DXF-Datei: alpine_sennhuette.dxf\nDXF-Version: AC1015\nAnzahl Layers: 2\nAnzahl geometrische Elemente: 16\n\n## Geometrische Elemente:\n### Linien (16 Stück):\n- Linie 1: Von Punkt (0.0, 0.0) zu Punkt (160.0, 0.0), Länge: 160.0 Einheiten\n- Linie 2: Von Punkt (160.0, 0.0) zu Punkt (160.0, 120.0), Länge: 120.0 Einheiten\n- Linie 3: Von Punkt (160.0, 120.0) zu Punkt (0.0, 120.0), Länge: 160.0 Einheiten\n- Linie 4: Von Punkt (0.0, 120.0) zu Punkt (0.0, 0.0), Länge: 120.0 Einheiten\n- Linie 5: Von Punkt (20.0, 0.0) zu Punkt (50.0, 0.0), Länge: 30.0 Einheiten\n- Linie 6: Von Punkt (0.0, 130.0) zu Punkt (160.0, 130.0), Länge: 160.0 Einheiten\n- Linie 7: Von Punkt (160.0, 130.0) zu Punkt (160.0, 180.0), Länge: 50.0 Einheiten\n- Linie 8: Von Punkt (160.0, 180.0) zu Punkt (0.0, 180.0), Länge: 160.0 Einheiten\n- Linie 9: Von Punkt (0.0, 180.0) zu Punkt (0.0, 130.0), Länge: 50.0 Einheiten\n- Linie 10: Von Punkt (70.0, 145.0) zu Punkt (90.0, 145.0), Länge: 20.0 Einheiten\n  ... und 6 weitere Linien\n"
+}
