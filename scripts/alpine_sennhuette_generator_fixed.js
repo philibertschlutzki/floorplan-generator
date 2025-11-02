@@ -1,6 +1,7 @@
 // QCAD Alpine Sennhütte Generator - Vollständig überarbeitete Version
 // Verbesserungen:
-// - Robuste JSON-Leselogik (QTextStream UTF-8, QIODevice.Text)
+// - Fix für QFile.open() Aufruf ohne undefined 'file' Variable
+// - Robuste JSON-Leselogik mit korrekter QIODevice Syntax
 // - Ausführliche Fehlerdiagnostik und Logging
 // - Sicherer Umgang mit Layern, Geometrie und Defaults
 // - Korrekte Verwendung von scale (Root-Level) statt dimensions.scale
@@ -54,7 +55,7 @@ function parseArguments() {
     return true;
 }
 
-// JSON aus Datei laden (robust, UTF-8)
+// JSON aus Datei laden (robust, UTF-8) - FIX für file.open() Problem
 function loadJsonConfig(configPath) {
     try {
         var f = new QFile(configPath);
@@ -64,7 +65,9 @@ function loadJsonConfig(configPath) {
             print("❌ Konfigurationsdatei existiert nicht: " + configPath);
             return null;
         }
-        if (!f.open(file.open(QIODevice.OpenMode(QIODevice.ReadOnly | QIODevice.Text)))) {
+        
+        // FIX: Korrekte QFile.open() Syntax ohne undefined 'file' Variable
+        if (!f.open(QIODevice.ReadOnly | QIODevice.Text)) {
             print("❌ Kann Konfigurationsdatei nicht öffnen (ReadOnly|Text): " + configPath);
             return null;
         }
