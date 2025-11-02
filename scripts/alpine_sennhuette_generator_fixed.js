@@ -1,7 +1,7 @@
 // QCAD Alpine Sennhütte Generator - Vollständig überarbeitete Version
 // Verbesserungen:
-// - Fix für QFile.open() Aufruf ohne undefined 'file' Variable
-// - Robuste JSON-Leselogik mit korrekter QIODevice Syntax
+// - Fix für QFile.open() Aufruf mit korrekter QIODevice.ReadOnly Syntax
+// - Robuste JSON-Leselogik mit verschiedenen Fallback-Strategien
 // - Ausführliche Fehlerdiagnostik und Logging
 // - Sicherer Umgang mit Layern, Geometrie und Defaults
 // - Korrekte Verwendung von scale (Root-Level) statt dimensions.scale
@@ -67,7 +67,7 @@ function parseArguments() {
     return true;
 }
 
-// JSON aus Datei laden (robust, UTF-8) - FIX für QFile.open() Problem
+// JSON aus Datei laden (robust, UTF-8) - VERBESSERTER FIX für QFile.open() Problem
 function loadJsonConfig(configPath) {
     try {
         var f = new QFile(configPath);
@@ -80,33 +80,73 @@ function loadJsonConfig(configPath) {
         
         print("✓ Datei existiert: " + configPath + " (Größe: " + fi.size() + " Bytes)");
         
-        // FIX: Vereinfachte QFile.open() ohne QIODevice-Konstanten (ReadOnly-Standard)
+        // KORRIGIERTER FIX: Verwende QIODevice.ReadOnly Konstante
         var opened = false;
+        var openMethod = "unknown";
+        
         try {
-            opened = f.open(); // Standard: ReadOnly
+            // Versuch 1: Mit QIODevice.ReadOnly Konstante
+            if (typeof QIODevice !== 'undefined' && typeof QIODevice.ReadOnly !== 'undefined') {
+                opened = f.open(QIODevice.ReadOnly);
+                openMethod = "QIODevice.ReadOnly";
+            }
         } catch (e1) {
-            // Fallback: numerischer Modus (1 = ReadOnly)
+            print("Warnung: QIODevice.ReadOnly nicht verfügbar: " + e1);
+        }
+        
+        if (!opened) {
             try {
+                // Versuch 2: Mit numerischem Wert für ReadOnly (1)
                 opened = f.open(1);
+                openMethod = "numerisch (1)";
             } catch (e2) {
-                print("❌ QFile.open() Exception: " + e2);
-                opened = false;
+                print("Warnung: Numerischer open(1) fehlgeschlagen: " + e2);
+            }
+        }
+        
+        if (!opened) {
+            try {
+                // Versuch 3: Alternativer Qt-Ansatz mit QFile::ReadOnly
+                if (typeof QFile !== 'undefined' && typeof QFile.ReadOnly !== 'undefined') {
+                    opened = f.open(QFile.ReadOnly);
+                    openMethod = "QFile.ReadOnly";
+                }
+            } catch (e3) {
+                print("Warnung: QFile.ReadOnly fehlgeschlagen: " + e3);
+            }
+        }
+        
+        if (!opened) {
+            try {
+                // Versuch 4: Standard open() - sollte ReadOnly sein
+                opened = f.open();
+                openMethod = "Standard open()";
+            } catch (e4) {
+                print("Warnung: Standard open() fehlgeschlagen: " + e4);
             }
         }
 
         if (!opened) {
-            print("❌ Kann Konfigurationsdatei nicht öffnen: " + configPath);
+            print("❌ Alle QFile.open() Versuche fehlgeschlagen für: " + configPath);
             if (typeof f.errorString === "function") {
-                print("Fehler: " + f.errorString());
+                print("QFile Fehler: " + f.errorString());
             }
             return null;
         }
+        
+        print("✓ Datei geöffnet mit Methode: " + openMethod);
 
         var ts = new QTextStream(f);
         // UTF-8 Codec setzen falls verfügbar
         if (typeof ts.setCodec === "function") {
-            ts.setCodec("UTF-8");
+            try {
+                ts.setCodec("UTF-8");
+                print("✓ UTF-8 Codec gesetzt");
+            } catch (codecErr) {
+                print("Warnung: UTF-8 Codec konnte nicht gesetzt werden: " + codecErr);
+            }
         }
+        
         var content = ts.readAll();
         f.close();
 
@@ -125,7 +165,7 @@ function loadJsonConfig(configPath) {
             return null;
         }
 
-        print("✓ Konfiguration geladen: " + (parsed.building_type || "unbekannt"));
+        print("✓ Konfiguration erfolgreich geladen: " + (parsed.building_type || "unbekannt"));
         return parsed;
     } catch (e) {
         print("❌ Fehler beim Laden/Parsen der JSON-Konfiguration: " + e);
