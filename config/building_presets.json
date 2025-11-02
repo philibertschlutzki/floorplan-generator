@@ -1,0 +1,31 @@
+{
+  "villa": {
+    "width": 15000,
+    "depth": 12000,
+    "floors": 2,
+    "rooms": "complex",
+    "description": "Villa mit erweiterten Grundrissen"
+  },
+  "apartment": {
+    "width": 8000,
+    "depth": 6000,
+    "floors": 2,
+    "rooms": "simple",
+    "description": "Mehrfamilienhaus"
+  },
+  "office": {
+    "width": 20000,
+    "depth": 10000,
+    "floors": 3,
+    "rooms": "complex",
+    "description": "Bürogebäude"
+  },
+  "small_house": {
+    "width": 6000,
+    "depth": 5000,
+    "floors": 1,
+    "rooms": "simple",
+    "description": "Kleines Einfamilienhaus"
+  }
+}
+
