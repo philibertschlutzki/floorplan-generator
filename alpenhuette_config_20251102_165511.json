@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-11-02T16:55:11.083696",
+  "building_type": "Alpine Sennhütte",
+  "dimensions": {
+    "foundation_length": 8.0,
+    "foundation_width": 6.0,
+    "stone_section_height": 1.5,
+    "stone_wall_thickness": 1.1,
+    "door_width": 1.5,
+    "door_height": 1.5,
+    "door_distance_from_edge": 1.0,
+    "wood_section_height": 2.5,
+    "log_diameter": 0.2,
+    "wood_window_width": 1.0,
+    "wood_window_height": 1.5,
+    "num_wood_windows": 1,
+    "roof_pitch_angle": 45.0,
+    "roof_overhang": 0.2,
+    "roof_material": "rotes Blech",
+    "porch_width": 0,
+    "porch_depth": 0,
+    "porch_height": 0,
+    "stone_finish": "rauer Naturstein",
+    "color_description": "graubrauner Stein, dunkelbraunes Holz"
+  },
+  "scale": "1:50",
+  "unit": "meters"
+}
