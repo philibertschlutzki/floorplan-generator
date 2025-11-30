@@ -3,7 +3,11 @@ from typing import Dict, Any
 
 class InteractiveDimensionProvider:
     """
-    Handles user interaction to gather dimensions for detected features.
+    Manages the interactive session with the user to gather real-world dimensions.
+
+    This class presents the user with detected features and default values, allowing
+    them to override or confirm the dimensions. This step is crucial for accurate
+    scaling of the generated CAD plan.
     """
 
     def __init__(self, logger: logging.Logger = None, defaults: Dict[str, Any] = None):
@@ -11,14 +15,19 @@ class InteractiveDimensionProvider:
         Initializes the InteractiveDimensionProvider.
 
         Args:
-            logger: Logger instance for logging messages.
-            defaults: A dictionary of default values for the prompts.
+            logger: Logger instance.
+            defaults: A dictionary of default values to use if the user skips input.
         """
         self.logger = logger or logging.getLogger(__name__)
         self.defaults = defaults or self._get_default_values()
 
-    def _get_default_values(self):
-        """Returns a dictionary of default values."""
+    def _get_default_values(self) -> Dict[str, float]:
+        """
+        Returns a dictionary of standard default values for an 'Alpenhütte'.
+
+        Returns:
+            Dict[str, float]: Default dimensions in meters.
+        """
         return {
             'foundation_length': 8.5,
             'foundation_width': 7.0,
@@ -37,14 +46,14 @@ class InteractiveDimensionProvider:
 
     def _prompt_for_float(self, prompt_text: str, default: float) -> float:
         """
-        Prompts the user for a float value with validation.
+        Helper method to prompt the user for a floating-point value.
 
         Args:
-            prompt_text: The text to display to the user.
-            default: The default value to use if the user enters nothing.
+            prompt_text (str): The question to ask the user.
+            default (float): The fallback value if the user enters nothing.
 
         Returns:
-            The float value entered by the user or the default.
+            float: The user's input or the default value.
         """
         while True:
             try:
@@ -57,13 +66,18 @@ class InteractiveDimensionProvider:
 
     def get_dimensions(self, detections: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Prompts the user to input dimensions for the detected features.
+        Conducts the interactive session to gather all necessary dimensions.
+
+        It adapts the questions based on what was detected (e.g., if no windows
+        were detected, it might ask about them anyway or skip detailed window questions
+        depending on logic).
 
         Args:
-            detections: A dictionary of detected features from the computer vision module.
+            detections (Dict[str, Any]): The output from the FeatureDetector.
 
         Returns:
-            A dictionary containing the user-provided dimensions.
+            Dict[str, Any]: A comprehensive dictionary of dimensions ready for configuration.
+                Includes metadata like 'confidence' and 'validation'.
         """
         self.logger.info("Starting interactive dimension input...")
         dimensions = {}
