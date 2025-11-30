@@ -6,10 +6,7 @@ It is intended to be used as a module by the main application orchestrator.
 
 import logging
 import sys
-import argparse
-import json
-from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional
 
 try:
     from cv_modules import (
