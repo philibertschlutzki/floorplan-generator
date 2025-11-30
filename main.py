@@ -106,6 +106,11 @@ def parse_arguments() -> argparse.Namespace:
         action='store_true',
         help='Enable debug logging.'
     )
+    parser.add_argument(
+        '--non-interactive',
+        action='store_true',
+        help='Run in non-interactive mode (use defaults and auto-approve perspective).'
+    )
     return parser.parse_args()
 
 def main():
@@ -151,33 +156,37 @@ def main():
                 preview_path = Path(args.output).parent / f"preview_rectified_{idx}.jpg"
                 cv2.imwrite(str(preview_path), processed_img)
                 print(f"\nPreview of rectification saved to: {preview_path}")
-                print("Please check the image.")
 
-                user_response = input("Is the perspective correction correct? (y/n) [y]: ").strip().lower()
-
-                if user_response == 'n':
-                    print("\nPlease enter the 4 corner points (x, y) starting from Top-Left, clockwise.")
-                    print(f"Original image size (Height x Width): {metadata['original_shape'][0]}x{metadata['original_shape'][1]}")
-                    print("Example input: 100, 200")
-
-                    points = []
-                    corners = ["Top-Left", "Top-Right", "Bottom-Right", "Bottom-Left"]
-                    try:
-                        for corner in corners:
-                            val = input(f"{corner} (x,y): ")
-                            parts = val.replace(',', ' ').split()
-                            if len(parts) != 2:
-                                raise ValueError
-                            x, y = int(parts[0]), int(parts[1])
-                            points.append([x, y])
-
-                        manual_points = np.array(points, dtype="float32")
-                        logger.info("Recalculating with manual points...")
-                    except ValueError:
-                        print("Invalid input format. Please try again.")
-                        continue
-                else:
+                if args.non_interactive:
+                    logger.info("Non-interactive mode: Auto-approving perspective correction.")
                     approved = True
+                else:
+                    print("Please check the image.")
+                    user_response = input("Is the perspective correction correct? (y/n) [y]: ").strip().lower()
+
+                    if user_response == 'n':
+                        print("\nPlease enter the 4 corner points (x, y) starting from Top-Left, clockwise.")
+                        print(f"Original image size (Height x Width): {metadata['original_shape'][0]}x{metadata['original_shape'][1]}")
+                        print("Example input: 100, 200")
+
+                        points = []
+                        corners = ["Top-Left", "Top-Right", "Bottom-Right", "Bottom-Left"]
+                        try:
+                            for corner in corners:
+                                val = input(f"{corner} (x,y): ")
+                                parts = val.replace(',', ' ').split()
+                                if len(parts) != 2:
+                                    raise ValueError
+                                x, y = int(parts[0]), int(parts[1])
+                                points.append([x, y])
+
+                            manual_points = np.array(points, dtype="float32")
+                            logger.info("Recalculating with manual points...")
+                        except ValueError:
+                            print("Invalid input format. Please try again.")
+                            continue
+                    else:
+                        approved = True
 
             # Step 2: Feature Detection
             logger.info("Step 2/5: Detecting features in the image...")
@@ -192,7 +201,7 @@ def main():
 
             # Step 3: Interactive Dimension Input
             logger.info("Step 3/5: Gathering dimensions interactively...")
-            dimension_provider = InteractiveDimensionProvider(logger=logger)
+            dimension_provider = InteractiveDimensionProvider(logger=logger, non_interactive=args.non_interactive)
             # In the future we might pass the mode to get_dimensions if needed
             dimensions_result = dimension_provider.get_dimensions(detections)
 

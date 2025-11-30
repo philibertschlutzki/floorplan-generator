@@ -42,9 +42,7 @@ htmlcov/
 .tox/
 
 # Output files
-output/*.dxf
-output/*.png
-output/*.jpg
+output/
 configs/generated_*.json
 test_outputs/
 
