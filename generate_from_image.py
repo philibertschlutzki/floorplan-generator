@@ -32,7 +32,8 @@ try:
         ImagePreprocessor,
         FeatureDetector,
         DimensionExtractor,
-        ConfigGenerator
+        ConfigGenerator,
+        InteractiveScaler
     )
 except ImportError:
     print("Error: cv_modules not found. Make sure you've installed requirements:")
@@ -130,6 +131,12 @@ Examples:
         '--debug',
         action='store_true',
         help='Enable debug logging'
+    )
+
+    parser.add_argument(
+        '--interactive-scale',
+        action='store_true',
+        help='Use interactive tool to define scale'
     )
     
     return parser.parse_args()
@@ -338,12 +345,24 @@ def main():
         logger.info("Step 2/5: Feature Detection")
         detections = detect_features(processed_img, logger)
         
+        # Determine scale
+        custom_scale = args.scale
+        if args.interactive_scale:
+            logger.info("Starting interactive scaling...")
+            scaler = InteractiveScaler(str(input_path))
+            interactive_scale = scaler.get_scale()
+            if interactive_scale:
+                custom_scale = interactive_scale
+                logger.info(f"Using interactively defined scale: {custom_scale:.2f} px/m")
+            else:
+                logger.warning("Interactive scaling cancelled. Falling back to default.")
+
         logger.info("Step 3/5: Dimension Extraction")
         dimensions_result = extract_dimensions(
             detections,
             processed_img.shape,
             metadata.get('scale'),
-            args.scale,
+            custom_scale,
             logger
         )
         

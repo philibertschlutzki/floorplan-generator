@@ -20,10 +20,12 @@ from .image_preprocessor import ImagePreprocessor
 from .feature_detector import FeatureDetector
 from .dimension_extractor import DimensionExtractor
 from .config_generator import ConfigGenerator
+from .interactive_scaler import InteractiveScaler
 
 __all__ = [
     "ImagePreprocessor",
     "FeatureDetector",
     "DimensionExtractor",
     "ConfigGenerator",
+    "InteractiveScaler",
 ]
