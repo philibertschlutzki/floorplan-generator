@@ -1,6 +1,6 @@
 // QCAD Alpine Sennhütte Generator - Vollständige Implementierung
 // Berücksichtigt ALLE Werte aus der JSON-Konfiguration
-// Erweiterte Funktionalität mit stabiler DXF-Ausgabe
+// Erweiterte Funktionalität mit stabiler DXF-Ausgabe, Multi-Fassade und Hintergrundbildern
 
 var configFile = "";
 var outputFile = "";
@@ -136,7 +136,7 @@ function drawThickWall(doc, di, x, y, width, height, thickness) {
         }
         
         di.applyOperation(op);
-        print("✓ Wand: " + width + "x" + height + " (Stärke: " + thickness + ") bei (" + x + "," + y + ")");
+        // print("✓ Wand: " + width + "x" + height + " (Stärke: " + thickness + ") bei (" + x + "," + y + ")");
         return true;
     } catch (e) {
         print("❌ Wand-Fehler: " + e);
@@ -163,7 +163,7 @@ function drawDetailedDoor(doc, di, x, y, width, height) {
         }
         di.applyOperation(op);
         
-        print("✓ Tür: " + width + "x" + height + " bei (" + x + "," + y + ")");
+        // print("✓ Tür: " + width + "x" + height + " bei (" + x + "," + y + ")");
         return true;
     } catch (e) {
         print("❌ Tür-Fehler: " + e);
@@ -191,7 +191,7 @@ function drawDetailedWindow(doc, di, x, y, width, height) {
         }
         di.applyOperation(op);
         
-        print("✓ Fenster: " + width + "x" + height + " bei (" + x + "," + y + ")");
+        // print("✓ Fenster: " + width + "x" + height + " bei (" + x + "," + y + ")");
         return true;
     } catch (e) {
         print("❌ Fenster-Fehler: " + e);
@@ -222,7 +222,7 @@ function drawDetailedRoof(doc, di, x, y, width, angle, overhang) {
         }
         di.applyOperation(op);
         
-        print("✓ Dach: Winkel " + angle + "°, Überhang " + overhang + " bei (" + x + "," + y + ")");
+        // print("✓ Dach: Winkel " + angle + "°, Überhang " + overhang + " bei (" + x + "," + y + ")");
         return true;
     } catch (e) {
         print("❌ Dach-Fehler: " + e);
@@ -254,7 +254,7 @@ function drawLogStructure(doc, di, x, y, width, height, logDiameter) {
         }
         di.applyOperation(op);
         
-        print("✓ Holzstruktur: " + numLogs + " Balken (Ø " + logDiameter + ") bei (" + x + "," + y + ")");
+        // print("✓ Holzstruktur: " + numLogs + " Balken (Ø " + logDiameter + ") bei (" + x + "," + y + ")");
         return true;
     } catch (e) {
         print("❌ Holzstruktur-Fehler: " + e);
@@ -265,7 +265,7 @@ function drawLogStructure(doc, di, x, y, width, height, logDiameter) {
 // Veranda (falls konfiguriert)
 function drawPorch(doc, di, x, y, width, depth, height) {
     if (width <= 0 || depth <= 0) {
-        print("ℹ️ Keine Veranda (Breite oder Tiefe = 0)");
+        // print("ℹ️ Keine Veranda (Breite oder Tiefe = 0)");
         return true;
     }
     
@@ -290,7 +290,7 @@ function drawPorch(doc, di, x, y, width, depth, height) {
         }
         di.applyOperation(op);
         
-        print("✓ Veranda: " + width + "x" + depth + " (Höhe: " + height + ") bei (" + x + "," + y + ")");
+        // print("✓ Veranda: " + width + "x" + depth + " (Höhe: " + height + ") bei (" + x + "," + y + ")");
         return true;
     } catch (e) {
         print("❌ Veranda-Fehler: " + e);
@@ -298,14 +298,46 @@ function drawPorch(doc, di, x, y, width, depth, height) {
     }
 }
 
+// Hintergrundbild einfügen
+function drawBackgroundImage(doc, di, imagePath, x, y, width, height) {
+    try {
+        if (!imagePath || imagePath === "") {
+            return false;
+        }
+
+        print("Versuche Bild zu laden: " + imagePath);
+
+        // In QCAD Javascript API, RImageEntity is used
+        // Parameters: document, data (RImageData), position (RVector)
+
+        // Note: QCAD scripting API for images can be tricky depending on version.
+        // Assuming RImageEntity(RDocument, RImageData, RVector)
+
+        // Need to create RImageData first
+        var imageData = new RImageData(imagePath, new RVector(x, y), new RVector(1, 0), new RVector(0, 1), width, height, 0);
+
+        var imageEntity = new RImageEntity(doc, imageData);
+
+        var op = new RAddObjectsOperation();
+        op.addObject(imageEntity, false);
+        di.applyOperation(op);
+
+        print("✓ Hintergrundbild eingefügt bei (" + x + "," + y + ")");
+        return true;
+    } catch (e) {
+        print("❌ Bild-Fehler: " + e);
+        // Fallback or just ignore if image fails (don't break the whole export)
+        return false;
+    }
+}
+
+
 // Hauptzeichnungsfunktion - VOLLSTÄNDIG ERWEITERT
-function drawAlpineSennhuette(doc, di, cfg) {
-    print("=== Beginne vollständige Zeichnung der Alpine Sennhütte ===");
+function drawAlpineSennhuette(doc, di, cfg, offsetX, offsetY) {
+    print("=== Zeichne Facade bei Offset " + offsetX + ", " + offsetY + " ===");
     
     var dims = cfg.dimensions || {};
     var scaleFactor = getScaleFactor(cfg.scale || "1:50");
-    
-    print("Maßstab: " + (cfg.scale || "1:50") + " (Faktor: " + scaleFactor + ")");
     
     // ALLE Dimensionen aus der Konfiguration
     var foundationLength = toNumberOrDefault(dims.foundation_length, 8.5) * scaleFactor;
@@ -326,40 +358,47 @@ function drawAlpineSennhuette(doc, di, cfg) {
     var porchDepth = toNumberOrDefault(dims.porch_depth, 0) * scaleFactor;
     var porchHeight = toNumberOrDefault(dims.porch_height, 0) * scaleFactor;
     
-    print("Fundament: " + foundationLength + "x" + foundationWidth);
-    print("Steinbereich: Höhe " + stoneHeight + ", Wandstärke " + stoneThickness);
-    print("Holzbereich: Höhe " + woodHeight + ", Balkendurchmesser " + logDiameter);
-    print("Fenster: " + windowWidth + "x" + windowHeight + " (Anzahl: " + numWindows + ")");
-    print("Dach: Winkel " + roofAngle + "°, Überhang " + roofOverhang);
-    print("Material: " + (dims.roof_material || "Standard") + ", Finish: " + (dims.stone_finish || "Standard"));
+    // Hintergrundbild
+    if (cfg.processed_image_path) {
+        // Berechne Gesamthöhe für Bildskalierung (ungefähr)
+        var totalHeight = stoneHeight + woodHeight + (foundationLength/2 * Math.tan(roofAngle * Math.PI/180));
+        // Wir zeichnen das Bild leicht transparent oder dahinter?
+        // In DXF gibt es keine Transparenz für Bilder direkt, aber Draw Order.
+        // Zeichne Bild etwas größer als das Gebäude
+        drawBackgroundImage(doc, di, cfg.processed_image_path, offsetX, offsetY, foundationLength, totalHeight);
+    }
     
     var success = true;
     
+    // Koordinaten an Offset anpassen
+    var currentX = offsetX;
+    var currentY = offsetY;
+
     // 1. Steinbereich (Fundament) mit Wandstärke
-    print("\n--- Zeichne Steinbereich ---");
-    if (!drawThickWall(doc, di, 0, 0, foundationLength, foundationWidth, stoneThickness)) {
+    // print("\n--- Zeichne Steinbereich ---");
+    if (!drawThickWall(doc, di, currentX, currentY, foundationLength, foundationWidth, stoneThickness)) {
         success = false;
     }
 
     // 2. Tür mit korrekter Höhe
-    print("\n--- Zeichne Tür ---");
-    if (!drawDetailedDoor(doc, di, doorDistance, 0, doorWidth, doorHeight)) {
+    // print("\n--- Zeichne Tür ---");
+    if (!drawDetailedDoor(doc, di, currentX + doorDistance, currentY, doorWidth, doorHeight)) {
         success = false;
     }
 
     // 3. Holzbereich mit Balkenstruktur
-    var woodY = foundationWidth + 10;
-    print("\n--- Zeichne Holzbereich ---");
-    if (!drawLogStructure(doc, di, 0, woodY, foundationLength, woodHeight, logDiameter)) {
+    var woodY = currentY + foundationWidth + 10;
+    // print("\n--- Zeichne Holzbereich ---");
+    if (!drawLogStructure(doc, di, currentX, woodY, foundationLength, woodHeight, logDiameter)) {
         success = false;
     }
 
     // 4. Mehrere Fenster entsprechend der Konfiguration
-    print("\n--- Zeichne Fenster ---");
+    // print("\n--- Zeichne Fenster ---");
     if (numWindows > 0) {
         var windowSpacing = foundationLength / (numWindows + 1);
         for (var w = 1; w <= numWindows; w++) {
-            var windowX = (windowSpacing * w) - (windowWidth / 2);
+            var windowX = currentX + (windowSpacing * w) - (windowWidth / 2);
             var windowY = woodY + (woodHeight - windowHeight) / 2;
             
             if (!drawDetailedWindow(doc, di, windowX, windowY, windowWidth, windowHeight)) {
@@ -370,31 +409,21 @@ function drawAlpineSennhuette(doc, di, cfg) {
 
     // 5. Dach mit konfigurierbarem Winkel und Überhang
     var roofY = woodY + woodHeight + 5;
-    print("\n--- Zeichne Dach ---");
-    if (!drawDetailedRoof(doc, di, 0, roofY, foundationLength, roofAngle, roofOverhang)) {
+    // print("\n--- Zeichne Dach ---");
+    if (!drawDetailedRoof(doc, di, currentX, roofY, foundationLength, roofAngle, roofOverhang)) {
         success = false;
     }
 
     // 6. Veranda (falls konfiguriert)
     if (porchWidth > 0 && porchDepth > 0) {
-        print("\n--- Zeichne Veranda ---");
-        var porchX = (foundationLength - porchWidth) / 2;
-        var porchY = -porchDepth;
+        // print("\n--- Zeichne Veranda ---");
+        var porchX = currentX + (foundationLength - porchWidth) / 2;
+        var porchY = currentY - porchDepth;
         if (!drawPorch(doc, di, porchX, porchY, porchWidth, porchDepth, porchHeight)) {
             success = false;
         }
     }
 
-    // Ausgabe der verwendeten Konfigurationswerte
-    print("\n=== VERWENDETE KONFIGURATION ===");
-    print("Building Type: " + (cfg.building_type || "Unbekannt"));
-    print("Maßstab: " + (cfg.scale || "1:50"));
-    print("Einheit: " + (cfg.unit || "meters"));
-    print("Dach材料: " + (dims.roof_material || "Standard"));
-    print("Steinoberfläche: " + (dims.stone_finish || "Standard"));
-    print("Farbbeschreibung: " + (dims.color_description || "Standard"));
-    
-    print("\n=== Zeichnung abgeschlossen (Erfolg: " + success + ") ===");
     return success;
 }
 
@@ -402,7 +431,7 @@ function drawAlpineSennhuette(doc, di, cfg) {
 function main() {
     try {
         print("=== QCAD Alpine Sennhütte Generator (Vollständig) ===");
-        print("Version: 2.0 - Alle Konfigurationswerte werden berücksichtigt");
+        print("Version: 3.0 - Multi-Fassade Support");
 
         if (!parseArguments()) {
             return;
@@ -414,18 +443,40 @@ function main() {
             return;
         }
 
-        // Konfigurationsvalidierung
-        if (!config.dimensions) {
-            print("❌ Keine 'dimensions' in der Konfiguration gefunden");
-            return;
-        }
-
         print("✓ Erstelle Dokument...");
         var doc = new RDocument(new RMemoryStorage(), new RSpatialIndexSimple());
         var di = new RDocumentInterface(doc);
 
         print("✓ Beginne vollständige Zeichnung...");
-        var drawSuccess = drawAlpineSennhuette(doc, di, config);
+        var drawSuccess = true;
+
+        // Prüfe ob neuer Multi-Config Modus
+        if (config.mode && config.configs && Array.isArray(config.configs)) {
+            print("ℹ️ Multi-Fassade Modus: " + config.configs.length + " Ansichten");
+            var offsetX = 0;
+            var spacing = 1000; // Abstand zwischen Fassaden
+
+            for (var i = 0; i < config.configs.length; i++) {
+                var subConfig = config.configs[i];
+                if (!drawAlpineSennhuette(doc, di, subConfig, offsetX, 0)) {
+                    drawSuccess = false;
+                }
+                // Offset für nächste Fassade berechnen (grob geschätzt auf 20m + Abstand)
+                // Besser: Aus Config lesen
+                var width = 2000; // Fallback
+                 if (subConfig.dimensions && subConfig.dimensions.foundation_length) {
+                     var scale = getScaleFactor(subConfig.scale || "1:50");
+                     width = subConfig.dimensions.foundation_length * scale;
+                 }
+                offsetX += width + spacing;
+            }
+        } else {
+            // Legacy Single Config
+            print("ℹ️ Einzel-Ansicht Modus");
+            if (!drawAlpineSennhuette(doc, di, config, 0, 0)) {
+                drawSuccess = false;
+            }
+        }
         
         if (!drawSuccess) {
             print("⚠️ Zeichnung mit Fehlern abgeschlossen");
@@ -475,7 +526,6 @@ function main() {
                 var outF = new QFileInfo(outputFile);
                 if (outF.exists() && outF.size() > 100) {
                     print("✅ ERFOLG: " + outputFile + " (" + outF.size() + " Bytes)");
-                    print("📊 Alle Konfigurationswerte wurden berücksichtigt!");
                 } else {
                     print("❌ Export fehlerhaft: Datei zu klein oder nicht vorhanden");
                 }

@@ -22,6 +22,7 @@ except ImportError:
 def process_image(
     image_path: str,
     apply_perspective: bool = True,
+    manual_points=None,
     apply_enhancement: bool = True,
     logger: Optional[logging.Logger] = None
 ) -> tuple:
@@ -31,6 +32,7 @@ def process_image(
     Args:
         image_path: Path to input image
         apply_perspective: Whether to apply perspective correction
+        manual_points: Optional manual points for perspective correction
         apply_enhancement: Whether to apply image enhancement
         logger: Logger instance
     
@@ -45,6 +47,7 @@ def process_image(
     processed_img, metadata = preprocessor.process(
         image_path,
         apply_perspective=apply_perspective,
+        manual_points=manual_points,
         apply_enhancement=apply_enhancement,
         apply_denoising=True
     )
