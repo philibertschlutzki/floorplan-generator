@@ -120,20 +120,31 @@ class ImagePreprocessor:
     def correct_perspective(
         self,
         image: np.ndarray,
-        auto_detect: bool = True
+        auto_detect: bool = True,
+        manual_points: Optional[np.ndarray] = None
     ) -> Tuple[np.ndarray, Optional[np.ndarray]]:
         """Apply perspective correction to image.
         
         Args:
             image: Input image
             auto_detect: If True, automatically detect corners
+            manual_points: Optional numpy array of shape (4, 2) with manual corner points
         
         Returns:
             Tuple of (corrected_image, transformation_matrix)
         """
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        rect = None
         
-        if auto_detect:
+        if manual_points is not None:
+            logger.info("Using manual points for perspective correction")
+            if manual_points.shape != (4, 2):
+                logger.error(f"Invalid manual points shape: {manual_points.shape}")
+                return image, None
+            rect = self._order_points(manual_points)
+
+        elif auto_detect:
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
             # Detect edges
             edges = cv2.Canny(gray, 50, 150, apertureSize=3)
             
@@ -166,7 +177,8 @@ class ImagePreprocessor:
             # Order points: top-left, top-right, bottom-right, bottom-left
             pts = best_contour.reshape(4, 2)
             rect = self._order_points(pts)
-            
+
+        if rect is not None:
             # Compute destination points
             (tl, tr, br, bl) = rect
             widthA = np.linalg.norm(br - bl)
@@ -283,6 +295,7 @@ class ImagePreprocessor:
         self,
         image_path: str,
         apply_perspective: bool = True,
+        manual_points: Optional[np.ndarray] = None,
         apply_enhancement: bool = True,
         apply_denoising: bool = True
     ) -> Tuple[np.ndarray, Dict[str, Any]]:
@@ -291,6 +304,7 @@ class ImagePreprocessor:
         Args:
             image_path: Path to input image
             apply_perspective: Whether to apply perspective correction
+            manual_points: Optional manual points for perspective correction
             apply_enhancement: Whether to apply image enhancement
             apply_denoising: Whether to apply denoising
         
@@ -318,7 +332,7 @@ class ImagePreprocessor:
         
         # Perspective correction
         if apply_perspective:
-            img, transform_matrix = self.correct_perspective(img)
+            img, transform_matrix = self.correct_perspective(img, manual_points=manual_points)
             metadata["perspective_corrected"] = transform_matrix is not None
             metadata["steps_applied"].append("perspective")
         

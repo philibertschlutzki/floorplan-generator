@@ -1,107 +1,66 @@
-# Floorplan Generator (CV Edition)
+# Building Plan & Facade Generator (CV Edition)
 
-Ein Python-Tool zur automatischen Generierung von Gebäudekonfigurationen (JSON) aus 2D-Grundrissbildern mithilfe von Computer Vision (OpenCV).
+Ein Python-Tool zur automatischen Generierung von Gebäudekonfigurationen und QCAD-Plänen aus 2D-Grundrissbildern und Fassadenfotos mithilfe von Computer Vision (OpenCV).
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/philibertschlutzki/floorplan-generator)
 
 ## 🌟 Features
 
-*   **Image-to-Config:** Verwandelt JPG/PNG Grundrisse direkt in strukturierte JSON-Daten.
-*   **Auto-Detection:** Erkennt Wände, Raumgrößen und Öffnungen automatisch.
-*   **Browser-Ready:** Vollständig optimiert für die Ausführung in der Cloud (GitHub Codespaces).
-*   **Modular:** Trennung von Bildverarbeitung, Validierung und Generierung.
+*   **Image-to-Config:** Verwandelt JPG/PNG Grundrisse oder Fassadenfotos in strukturierte QCAD-Pläne.
+*   **Dual Mode:** Unterstützt sowohl **Grundrisse** (`--mode floorplan`) als auch **Fassaden** (`--mode facade`).
+*   **Auto-Correction & Manual QA:** Automatische Perspektivkorrektur mit integriertem manuellen Korrektur-Workflow.
+*   **Multi-Image Support:** Verarbeitet mehrere Bilder (z.B. 4 Fassadenansichten) in einem Durchgang.
+*   **Browser-Ready:** Optimiert für GitHub Codespaces.
 
 ---
 
 ## ☁️ Quick Start: GitHub Codespaces
 
-Die einfachste Art, das Tool zu nutzen, ist direkt hier im Browser. **Keine Installation auf deinem PC notwendig!**
-
 ### 1. Umgebung starten
-Klicke oben auf den Button **"Open in GitHub Codespaces"**.
-*   GitHub erstellt einen virtuellen Computer für dich.
-*   Es werden automatisch alle nötigen Bibliotheken (OpenCV, NumPy) installiert.
-*   *Hinweis: Der erste Start kann ca. 2-3 Minuten dauern.*
+Klicke auf **"Open in GitHub Codespaces"**.
 
-### 2. Warten bis Setup abgeschlossen ist
-Das Terminal zeigt den Fortschritt an. Warte, bis diese Meldung erscheint:
-```
-✅ Setup Complete!
-```
+### 2. Bild hochladen
+Lade deine Bilder (z.B. `front.jpg`, `side.jpg`) in das Projektverzeichnis hoch.
 
-### 3. Bild hochladen
-Ziehe dein Grundriss-Bild (z.B. `plan.jpg`) einfach per Drag & Drop in die Dateiliste links im Editor.
+### 3. Generierung starten
 
-### 4. Generierung starten
-Gib unten im Terminal folgenden Befehl ein:
-
+**Für einen Grundriss (Einzelbild):**
 ```bash
-python generate_from_image.py --input plan.jpg --output mein_haus.json
+python main.py --input plan.jpg --output mein_haus.dxf --mode floorplan
 ```
 
-*Optional mit Skalierung (Pixel pro Meter):*
+**Für Fassaden (Mehrere Bilder, z.B. 4 Seiten):**
 ```bash
-python generate_from_image.py --input plan.jpg --output mein_haus.json --scale 100
+python main.py --input front.jpg back.jpg left.jpg right.jpg --output meine_fassade.dxf --mode facade
 ```
 
-### 5. Ergebnisse nutzen
-*   Die Datei `mein_haus.json` erscheint in der Dateiliste.
-*   Rechtsklick → **Download**, um sie zu sichern.
+### 4. Interaktiver Workflow
+Das Tool führt dich durch den Prozess:
+1.  **Perspektivkorrektur:** Es wird eine Vorschau angezeigt (`preview_rectified_X.jpg`). Du kannst bestätigen (`y`) oder manuell 4 Eckpunkte eingeben (`n`), um die Entzerrung zu korrigieren.
+2.  **Maßeingabe:** Gib die realen Maße (Länge, Breite, Höhen) ein, um den Plan zu skalieren.
+3.  **Ergebnis:** Die fertige `.dxf` Datei wird erstellt und enthält die entzerrten Bilder als Referenz sowie die generierten Linienzeichnungen.
 
 ---
 
-## 🔧 Problembehandlung
+## 🔧 Funktionen im Detail
 
-### Fehler: "ImportError: libGL.so.1: cannot open shared object file"
+### 1. Fassaden-Modus (`--mode facade`)
+*   Ermöglicht das Hochladen von Fotos echter Gebäude.
+*   Gleicht Verzerrungen (Perspektive) aus.
+*   Ordnet mehrere Ansichten nebeneinander in einer QCAD-Zeichnung an.
+*   Fügt das entzerrte Originalfoto als Hintergrundbild ein, um manuelles Nachzeichnen zu erleichtern.
 
-Dieses Problem tritt auf, wenn die OpenCV-Bibliothek versucht, grafische Komponenten zu laden, die in Cloud-Umgebungen nicht verfügbar sind.
-
-**Automatische Lösung (empfohlen):**
-Das Projekt verwendet seit dem neuesten Update `opencv-python-headless`, welches keine grafischen Bibliotheken benötigt. Falls du den Fehler trotzdem siehst:
-
-1. **Abhängigkeiten neu installieren:**
-   ```bash
-   pip install --upgrade pip
-   pip install -r requirements.txt --force-reinstall
-   ```
-
-2. **Tests erneut ausführen:**
-   ```bash
-   python -m unittest discover tests
-   ```
-
-**Manuelle Lösung (falls automatisch nicht funktioniert):**
-Falls die automatische Installation fehlschlägt, installiere die fehlenden Systembibliotheken manuell:
-
-```bash
-sudo apt-get update
-sudo apt-get install -y libgl1-mesa-glx libglib2.0-0
+### 2. Manuelle Korrektur (QA)
+Wenn die automatische Erkennung des Gebäudes fehlschlägt, fragt das Tool nach den 4 Ecken:
 ```
-
-### Tests schlagen fehl mit "No module named 'cv2'"
-
-OpenCV wurde nicht korrekt installiert. Führe aus:
-
-```bash
-pip install opencv-python-headless>=4.8.0
+Top-Left (x,y): 100, 200
+Top-Right (x,y): ...
 ```
-
-### Codespace startet nicht oder friert ein
-
-1. Gehe zu [github.com/codespaces](https://github.com/codespaces)
-2. Lösche den bestehenden Codespace
-3. Erstelle einen neuen mit dem "Open in GitHub Codespaces" Button
+Dies garantiert, dass auch schwierige Fotos korrekt entzerrt werden.
 
 ---
 
-## 🛠 Lokale Installation (Experten)
-
-### Voraussetzungen
-- Python 3.8 oder höher
-- pip (Python Package Manager)
-- Git
-
-### Installation
+## 🛠 Lokale Installation
 
 ```bash
 git clone https://github.com/philibertschlutzki/floorplan-generator.git
@@ -109,58 +68,7 @@ cd floorplan-generator
 pip install -r requirements.txt
 ```
 
-### Wichtige Hinweise zur lokalen Installation
-
-**Für Cloud/Server-Umgebungen (ohne Display):**
-Das Projekt verwendet standardmäßig `opencv-python-headless`, das keine GUI-Funktionen hat. Dies ist ideal für:
-- GitHub Codespaces
-- Docker Container
-- Server ohne grafische Oberfläche
-- CI/CD Pipelines
-
-**Für lokale Desktop-Entwicklung (mit Display):**
-Wenn du OpenCV GUI-Funktionen wie `cv2.imshow()` nutzen möchtest, kannst du in der `requirements.txt` die headless-Version durch die normale Version ersetzen:
-
-```
-# Ändere diese Zeile:
-opencv-python-headless>=4.8.0
-
-# Zu:
-opencv-python>=4.8.0
-```
-
-Dann neu installieren:
-```bash
-pip install -r requirements.txt --force-reinstall
-```
-
----
-
-## 🧪 Tests ausführen
-
-Um die Funktionalität der Bilderkennung zu prüfen:
-
-```bash
-python -m unittest discover tests
-```
-
-Oder mit pytest (empfohlen für detaillierte Ausgabe):
-
-```bash
-pytest tests/ -v
-```
-
-### Erwartetes Ergebnis
-
-Bei erfolgreicher Installation sollten alle Tests durchlaufen:
-```
-======================================================================
-Ran X tests in Y.ZZZs
-
-OK
-```
-
-Falls Tests fehlschlagen, siehe Abschnitt **Problembehandlung** oben.
+**Hinweis:** Für die Anzeige von Vorschaufenstern wird eine grafische Umgebung benötigt. In Headless-Umgebungen (wie Codespaces) werden Vorschaubilder gespeichert, statt angezeigt.
 
 ---
 
@@ -168,55 +76,25 @@ Falls Tests fehlschlagen, siehe Abschnitt **Problembehandlung** oben.
 
 ```
 floorplan-generator/
-├── cv_modules/              # Kernlogik für Computer Vision
-│   ├── image_preprocessor.py   # Bildvorverarbeitung
-│   ├── feature_detector.py     # Erkennung von Wänden/Türen
-│   ├── dimension_extractor.py  # Maßextraktion
-│   └── config_generator.py     # JSON-Generierung
-├── validation/              # Validierung der Ergebnisse
-├── tests/                   # Unit- und Integrationstests
-├── .devcontainer/           # Codespaces-Konfiguration
-├── generate_from_image.py   # Hauptskript
-├── requirements.txt         # Python-Abhängigkeiten
+├── cv_modules/              # Computer Vision Module
+│   ├── image_preprocessor.py   # Entzerrung & Vorverarbeitung
+│   ├── feature_detector.py     # Erkennung von Fenstern/Türen
+│   └── ...
+├── scripts/                 # QCAD Skripte
+│   └── alpine_sennhutte_generator_improved.js # DXF Generator
+├── main.py                  # Hauptprogramm
+├── generate_from_image.py   # CV Pipeline Wrapper
 └── README.md               # Diese Datei
 ```
 
 ---
 
-## 💡 Tipps für beste Ergebnisse
-
-### Bildqualität
-- **Auflösung:** Mindestens 1000x1000 Pixel
-- **Format:** PNG oder JPG
-- **Kontrast:** Klare Linien zwischen Wänden und Hintergrund
-- **Farbe:** Schwarz-Weiß oder mit klaren Farbunterschieden
-
-### Skalierung
-Wenn du die `--scale` Option verwendest:
-- Messe in deinem Bild, wie viele Pixel einem Meter entsprechen
-- Beispiel: Wenn eine 5m lange Wand 500 Pixel lang ist, dann `--scale 100`
-
----
-
 ## 🤝 Beitragen
 
-Beiträge sind willkommen! Bitte:
-1. Forke das Repository
-2. Erstelle einen Feature-Branch (`git checkout -b feature/NeuesFunktion`)
-3. Committe deine Änderungen (`git commit -m 'Füge neue Funktion hinzu'`)
-4. Push zum Branch (`git push origin feature/NeuesFunktion`)
-5. Öffne einen Pull Request
+Pull Requests sind willkommen! Bitte erstelle für neue Features einen eigenen Branch.
 
 ---
 
 ## 📝 Lizenz
 
-Dieses Projekt steht unter der MIT-Lizenz.
-
----
-
-## 🔗 Weitere Ressourcen
-
-- [OpenCV Dokumentation](https://docs.opencv.org/)
-- [GitHub Codespaces Dokumentation](https://docs.github.com/codespaces)
-- [Python unittest Dokumentation](https://docs.python.org/3/library/unittest.html)
+MIT Lizenz.
