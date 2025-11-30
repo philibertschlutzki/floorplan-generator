@@ -1,30 +1,11 @@
 #!/usr/bin/env python3
-"""Main orchestrator script for image-to-config generation.
-
-This script coordinates the complete pipeline:
-1. Load and preprocess building image
-2. Detect architectural features using Computer Vision
-3. Extract dimensional measurements
-4. Generate JSON configuration file
-5. Validate output
-
-Usage:
-    python generate_from_image.py --input building.jpg --output config.json
-    python generate_from_image.py --input building.jpg --output config.json --scale 120 --visualize
-
-Example:
-    # Basic usage
-    python generate_from_image.py -i test_inputs/example_building.png -o configs/generated.json
-    
-    # With custom scale and visualization
-    python generate_from_image.py -i image.jpg -o config.json --scale 100 --visualize --debug
+"""
+This script provides the core functionalities for image processing and feature detection.
+It is intended to be used as a module by the main application orchestrator.
 """
 
-import argparse
 import logging
 import sys
-from pathlib import Path
-import json
 from typing import Optional
 
 try:
@@ -145,14 +126,17 @@ Examples:
 def process_image(
     image_path: str,
     apply_perspective: bool = True,
+    manual_points=None,
     apply_enhancement: bool = True,
     logger: Optional[logging.Logger] = None
 ) -> tuple:
-    """Process image through preprocessing pipeline.
+    """
+    Process image through preprocessing pipeline.
     
     Args:
         image_path: Path to input image
         apply_perspective: Whether to apply perspective correction
+        manual_points: Optional manual points for perspective correction
         apply_enhancement: Whether to apply image enhancement
         logger: Logger instance
     
@@ -167,6 +151,7 @@ def process_image(
     processed_img, metadata = preprocessor.process(
         image_path,
         apply_perspective=apply_perspective,
+        manual_points=manual_points,
         apply_enhancement=apply_enhancement,
         apply_denoising=True
     )
@@ -181,7 +166,8 @@ def detect_features(
     image,
     logger: Optional[logging.Logger] = None
 ) -> dict:
-    """Detect architectural features in image.
+    """
+    Detect architectural features in image.
     
     Args:
         image: Preprocessed image
@@ -207,54 +193,13 @@ def detect_features(
     return detections
 
 
-def extract_dimensions(
-    detections: dict,
-    image_shape: tuple,
-    scale_info: Optional[dict] = None,
-    custom_scale: Optional[float] = None,
-    logger: Optional[logging.Logger] = None
-) -> dict:
-    """Extract real-world dimensions from detections.
-    
-    Args:
-        detections: Feature detection results
-        image_shape: Shape of processed image
-        scale_info: Scale information from preprocessing
-        custom_scale: User-provided scale override
-        logger: Logger instance
-    
-    Returns:
-        Dictionary with extracted dimensions and metadata
-    """
-    if logger:
-        logger.info("Extracting dimensions...")
-    
-    # Use custom scale if provided
-    if custom_scale:
-        scale_info = {'pixels_per_meter': custom_scale}
-        if logger:
-            logger.info(f"Using custom scale: {custom_scale} px/m")
-    
-    extractor = DimensionExtractor(
-        pixels_per_meter=scale_info.get('pixels_per_meter', 100.0) if scale_info else 100.0
-    )
-    
-    result = extractor.extract(detections, image_shape, scale_info)
-    
-    if logger:
-        logger.info(f"Extraction complete. Confidence: {result['confidence']:.2f}")
-        if result['validation']['warnings']:
-            logger.warning(f"Validation warnings: {result['validation']['warnings']}")
-    
-    return result
-
-
 def generate_config(
     dimensions_result: dict,
     building_type: str,
     logger: Optional[logging.Logger] = None
 ) -> dict:
-    """Generate JSON configuration from extracted dimensions.
+    """
+    Generate JSON configuration from extracted dimensions.
     
     Args:
         dimensions_result: Result from dimension extraction
@@ -271,10 +216,10 @@ def generate_config(
     
     metadata = {
         'extraction_confidence': dimensions_result['confidence'],
-        'confidence_details': dimensions_result['confidence_details'],
+        'confidence_details': dimensions_result.get('confidence_details', {}),
         'validation_warnings': dimensions_result['validation']['warnings'],
         'scale_used': dimensions_result['scale_used'],
-        'generation_method': 'computer_vision'
+        'generation_method': 'interactive'
     }
     
     config = generator.generate(
@@ -295,7 +240,8 @@ def save_visualization(
     output_path: str,
     logger: Optional[logging.Logger] = None
 ):
-    """Save visualization of detected features.
+    """
+    Save visualization of detected features.
     
     Args:
         image: Original/processed image
