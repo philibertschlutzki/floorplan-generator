@@ -1,5 +1,6 @@
 # Computer Vision and Image Processing
-opencv-python>=4.8.0
+# Using headless version for cloud/codespaces compatibility (no GUI dependencies)
+opencv-python-headless>=4.8.0
 numpy>=1.24.0
 Pillow>=10.0.0
 scikit-image>=0.21.0
