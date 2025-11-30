@@ -1,29 +1,3 @@
-"""
-Building Plan & Facade Generator (CV Edition)
-
-This is the main entry point for the application. It orchestrates the entire workflow
-of converting building images (floorplans or facades) into QCAD-compatible DXF files.
-
-The workflow consists of five main steps:
-1.  **Image Processing:** Loads the image, applies perspective correction (auto or manual),
-    and prepares it for feature detection.
-2.  **Feature Detection:** Uses Computer Vision (OpenCV) to identify architectural elements
-    like windows, doors, walls, and roof lines.
-3.  **Interactive Dimension Input:** Prompts the user to provide real-world dimensions
-    for the detected features (or verify defaults).
-4.  **Configuration Generation:** Creates a standardized JSON configuration object containing
-    all dimensions and metadata needed for the QCAD script.
-5.  **DXF Creation:** Calls an external QCAD script (via `qcad_creator.py`) to generate
-    the final .dxf drawing file.
-
-Usage:
-    python main.py --input <image_path> --output <output_path> [options]
-
-Example:
-    python main.py --input plan.jpg --output house.dxf --mode floorplan
-    python main.py --input front.jpg side.jpg --output facade.dxf --mode facade
-"""
-
 import argparse
 import logging
 import sys
@@ -31,25 +5,13 @@ from pathlib import Path
 import json
 import cv2
 import numpy as np
-from typing import List, Dict, Any, Optional
 
 from generate_from_image import process_image, detect_features, generate_config, save_visualization
 from interactive_dimension_provider import InteractiveDimensionProvider
 from qcad_creator import QCadCreator
 
 def setup_logging(debug: bool = False) -> logging.Logger:
-    """
-    Configure the logging system.
-
-    Sets up logging to both stdout and a file ('logs/main_workflow.log').
-    The log level is determined by the `debug` flag.
-
-    Args:
-        debug (bool): If True, sets the log level to DEBUG. Otherwise, INFO.
-
-    Returns:
-        logging.Logger: The configured logger instance.
-    """
+    """Configure logging based on the debug flag."""
     level = logging.DEBUG if debug else logging.INFO
     logging.basicConfig(
         level=level,
@@ -62,17 +24,7 @@ def setup_logging(debug: bool = False) -> logging.Logger:
     return logging.getLogger(__name__)
 
 def parse_arguments() -> argparse.Namespace:
-    """
-    Parse command line arguments.
-
-    Returns:
-        argparse.Namespace: An object containing the parsed arguments.
-            - input (list[str]): List of input image paths.
-            - output (str): Path to the output DXF file.
-            - mode (str): Operation mode ('floorplan' or 'facade').
-            - visualize (bool): Whether to save a visualization image.
-            - debug (bool): Whether to enable debug logging.
-    """
+    """Parse command line arguments."""
     parser = argparse.ArgumentParser(
         description='Generate a QCAD plan from a building image with interactive dimension input.'
     )
@@ -109,20 +61,7 @@ def parse_arguments() -> argparse.Namespace:
     return parser.parse_args()
 
 def main():
-    """
-    Main execution function.
-
-    1. Parses arguments.
-    2. Sets up logging.
-    3. Iterates through input images (handling single or multiple views).
-    4. For each image:
-        - Processes the image (rectification).
-        - Detects features.
-        - Asks user for dimensions.
-        - Generates a configuration.
-    5. Merges configurations if necessary.
-    6. Calls QCadCreator to generate the DXF file.
-    """
+    """Main execution function."""
     args = parse_arguments()
 
     Path('logs').mkdir(exist_ok=True)
@@ -131,7 +70,7 @@ def main():
     logger.info(f"Starting the interactive generation process in {args.mode} mode.")
 
     try:
-        all_configs: List[Dict[str, Any]] = []
+        all_configs = []
 
         for idx, input_path in enumerate(args.input):
             logger.info(f"Processing image {idx + 1}/{len(args.input)}: {input_path}")
@@ -140,9 +79,9 @@ def main():
             logger.info("Step 1/5: Processing the input image...")
 
             approved = False
-            manual_points: Optional[np.ndarray] = None
-            processed_img: Optional[np.ndarray] = None
-            metadata: Optional[Dict[str, Any]] = None
+            manual_points = None
+            processed_img = None
+            metadata = None
 
             while not approved:
                 processed_img, metadata = process_image(input_path, manual_points=manual_points, logger=logger)

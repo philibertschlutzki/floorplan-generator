@@ -3,15 +3,11 @@ import subprocess
 import tempfile
 import json
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 class QCadCreator:
     """
-    Handles the generation of DXF files by interfacing with QCAD.
-
-    This class prepares the configuration data, identifies the best strategy
-    to run QCAD (depending on the environment, e.g., headless with xvfb),
-    and executes the generation script.
+    Generates a DXF file from a JSON configuration using QCAD.
     """
 
     def __init__(self, logger: logging.Logger = None):
@@ -19,26 +15,17 @@ class QCadCreator:
         Initializes the QCadCreator.
 
         Args:
-            logger: Logger instance. If None, a new logger is created.
+            logger: Logger instance for logging messages.
         """
         self.logger = logger or logging.getLogger(__name__)
         self.js_script = "scripts/alpine_sennhutte_generator_improved.js"
 
-    def _get_qcad_strategies(self, qcad_executable: str) -> List[List[str]]:
+    def _get_qcad_strategies(self, qcad_executable: str):
         """
-        Returns a list of command-line strategies to run QCAD.
-
-        This attempts to handle different environments:
-        1.  `xvfb-run`: For headless Linux environments (like Codespaces or CI/CD)
-            where a virtual display is needed.
-        2.  `flatpak`: For systems where QCAD is installed via Flatpak.
-        3.  Direct execution: For standard desktop installations with a GUI.
+        Returns a list of strategies to run QCAD headlessly.
 
         Args:
-            qcad_executable (str): The name or path of the QCAD executable (default: 'qcad').
-
-        Returns:
-            List[List[str]]: A list of command arguments for subprocess calls.
+            qcad_executable: The path to the QCAD executable.
         """
         return [
             ["xvfb-run", "-a", "-s", "-screen 0 1024x768x24 -dpi 96", qcad_executable, "-autostart"],
@@ -50,16 +37,13 @@ class QCadCreator:
         """
         Generates a DXF file from the given configuration.
 
-        It tries multiple execution strategies until one succeeds or all fail.
-
         Args:
-            config (Dict[str, Any]): The configuration dictionary containing
-                dimensions and building parameters.
-            output_path (str): The destination path for the generated DXF file.
-            qcad_executable (str): The QCAD executable name. Defaults to "qcad".
+            config: The configuration dictionary.
+            output_path: The path to save the generated DXF file.
+            qcad_executable: The path to the QCAD executable.
 
         Returns:
-            bool: True if the DXF file was created successfully, False otherwise.
+            True if the DXF file was created successfully, False otherwise.
         """
         self.logger.info(f"Starting DXF generation for {output_path}...")
 
