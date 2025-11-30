@@ -10,16 +10,18 @@ class InteractiveDimensionProvider:
     scaling of the generated CAD plan.
     """
 
-    def __init__(self, logger: logging.Logger = None, defaults: Dict[str, Any] = None):
+    def __init__(self, logger: logging.Logger = None, defaults: Dict[str, Any] = None, non_interactive: bool = False):
         """
         Initializes the InteractiveDimensionProvider.
 
         Args:
             logger: Logger instance.
             defaults: A dictionary of default values to use if the user skips input.
+            non_interactive: If True, uses default values without asking the user.
         """
         self.logger = logger or logging.getLogger(__name__)
         self.defaults = defaults or self._get_default_values()
+        self.non_interactive = non_interactive
 
     def _get_default_values(self) -> Dict[str, float]:
         """
@@ -81,6 +83,23 @@ class InteractiveDimensionProvider:
         """
         self.logger.info("Starting interactive dimension input...")
         dimensions = {}
+
+        if self.non_interactive:
+            self.logger.info("Non-interactive mode: Using default dimensions.")
+            dimensions = self.defaults.copy()
+
+            # Adjust defaults based on detections where appropriate
+            if detections.get('windows'):
+                dimensions['num_wood_windows'] = len(detections['windows'])
+            else:
+                dimensions['num_wood_windows'] = 0
+
+            return {
+                'dimensions': dimensions,
+                'confidence': 0.8,  # Slightly lower confidence for defaults
+                'validation': {'warnings': ["Used default values due to non-interactive mode"]},
+                'scale_used': 'default'
+            }
 
         print("\nPlease provide the dimensions for the detected features.")
         print("Press Enter to accept the default value shown in parentheses.")

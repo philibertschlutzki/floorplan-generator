@@ -12,6 +12,8 @@ Ein Python-Tool zur automatischen Generierung von Gebäudekonfigurationen und QC
 *   **Multi-Image Support:** Verarbeitet mehrere Bilder (z.B. 4 Fassadenansichten) in einem Durchgang.
 *   **Browser-Ready:** Optimiert für GitHub Codespaces und Headless-Umgebungen.
 *   **Interaktive Bemaßung:** Fragt nach der Erkennung die realen Maße ab, um präzise Skalierung zu gewährleisten.
+*   **Automated Testing & Demo:** Enthält ein Skript (`scripts/demonstrate_capabilities.py`), das die Leistungsfähigkeit durch Download und Verarbeitung von Testbildern demonstriert.
+*   **Non-Interactive Mode:** `--non-interactive` Flag für automatisierte Pipelines ohne Benutzereingabe.
 
 ---
 
@@ -33,6 +35,12 @@ python main.py --input plan.jpg --output mein_haus.dxf --mode floorplan
 **Für Fassaden (Mehrere Bilder, z.B. 4 Seiten):**
 ```bash
 python main.py --input front.jpg back.jpg left.jpg right.jpg --output meine_fassade.dxf --mode facade
+```
+
+**Automatisierte Demonstration (Showcase):**
+Um die Leistungsfähigkeit des Tools zu testen (lädt Beispielbilder herunter):
+```bash
+python scripts/demonstrate_capabilities.py
 ```
 
 ### 4. Interaktiver Workflow
