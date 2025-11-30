@@ -12,7 +12,7 @@ Example:
 
 import json
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple, List
 from pathlib import Path
 import logging
 
